@@ -1,0 +1,77 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>ajax blind</title>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
+</head>
+<script type="text/javascript">
+    /**
+     * 작성자: kanghj
+     * 설  명: ajax요청시 loading화면 보여주기 로딩 이미지(loding.gif)는 license 구글에서 무료인거 가져옴
+     *         나중에 이미지 대신에 loading.js 사용해서 넣을거임 (https://loading.io/progress/)
+     */
+    'user strict'
+
+    function requestAjax() {
+        Blind.ajax({
+            url: 'https://reqres.in/api/users/2',
+            type: 'get',
+            dataType: 'jsonp',
+            success: function(data) {
+                alert('성공');
+            },
+            error: function(error) {
+                alert('실패');
+            }
+        });
+    }
+
+    var Blind = {
+        squareSize: 100,
+        loadingImgFile: 'loding.gif',
+        style: {
+            loadingImg :{
+                'position':'absolute', 'background':'transparent', 'z-index':100
+            },
+            blind: {
+                'width':'100%', 'height':'100%', 'position':'absolute', 'top':0, 'left':0,
+                'filter':'Alpha(opacity=50)', 'opacity':0.5, 'background':'#000', 'z-index':99
+            }
+        },
+        setBlind: function() {
+            if($('#blindWrapper').length < 1) Blind.createBlind();
+            $('#blindWrapper').toggle();
+        },
+        createBlind: function() {
+            $('body').append(
+                $('<div>')
+                .attr('id', 'blindWrapper')
+                .append(
+                    $('<div>')
+                    .attr('id', 'loadingImg')
+                    .css(Blind.style.loadingImg)
+                    .css('top', ($('body').height() / 2) - (Blind.squareSize/2 + 100))
+                    .css('left', ($('body').width() / 2) - (Blind.squareSize/2))
+                    .append(
+                        $('<img>')
+                        .attr('src', Blind.loadingImgFile)
+                        .css('width', Blind.squareSize)
+                        .css('height', Blind.squareSize)
+                    )
+                )
+            );
+            $('#blindWrapper').append($('<div>').css(Blind.style.blind)).hide();
+        },
+        ajax: function(options) {
+            options = $.extend(true, options, {
+                beforeSend: function(xhr){Blind.setBlind();},
+                complete: function(e) {Blind.setBlind();}
+            });
+            $.ajax(options);
+        }
+    }
+</script>
+<body>
+    <a href="#none" onclick="javascript:requestAjax();">ajax request</a>
+</body>
+</html>
